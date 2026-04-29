@@ -62,7 +62,7 @@ def register_page(request):
 def activate_email(request , email_token):
     try:
         user= Profile.objects.get(email_token= email_token)
-        user.is_email_verified - True
+        user.is_email_verified = True
         user.save()
         return redirect('/')
     
