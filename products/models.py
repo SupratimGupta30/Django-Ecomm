@@ -61,3 +61,10 @@ class Product(BaseModel):
 class ProductImage(BaseModel):
     product = models.ForeignKey(Product , on_delete=models.CASCADE , related_name="product_images")
     image =  models.ImageField(upload_to="product")
+
+
+class Coupon(BaseModel):
+    code = models.CharField(max_length=50)
+    is_expired = models.BooleanField(default=False)
+    discount_price = models.IntegerField(default=100)
+    minimum_amount = models.IntegerField(default=1000)

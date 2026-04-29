@@ -1,6 +1,10 @@
+from products.models import SizeVariant
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from products.models import Product
+from accounts.models import Cart, CartItem
 
 # Create your views here.
 
@@ -20,3 +24,21 @@ def get_products(request, slug):
         return render(request, 'product/product.html', context)
     except Exception as e:
         print(e)
+
+
+@login_required
+def add_to_cart(request, uid):
+    variant= request.GET.get("variant")
+    product = Product.objects.get(uid= uid)
+    user = request.user
+    cart, _ = Cart.objects.get_or_create(user = user, is_paid=False)
+
+    cart_item = CartItem.objects.create(cart = cart, product = product)
+        
+    if variant:
+        variant = request.GET.get("variant")
+        size_variant = SizeVariant.objects.get(size_name=variant)
+        cart_item.size_variant = size_variant
+        cart_item.save()
+        
+    return HttpResponseRedirect(request.path_info)

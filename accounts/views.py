@@ -1,3 +1,4 @@
+from accounts.models import Cart
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -67,3 +68,8 @@ def activate_email(request , email_token):
     
     except Exception as e:
         return HttpResponse('Invalid Email token')
+
+
+def cart(request):
+    cart = Cart.objects.filter(user=request.user, is_paid=False).first()
+    return render(request, 'accounts/cart.html', {'cart': cart})
