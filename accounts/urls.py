@@ -1,6 +1,5 @@
-from products.views import add_to_cart
 from django.urls import path
-from accounts.views import activate_email, login_page, register_page, cart
+from accounts.views import activate_email, login_page, register_page, cart, add_to_cart
 
 urlpatterns = [
    path('login/' , login_page , name="login" ),

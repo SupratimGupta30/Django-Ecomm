@@ -1,12 +1,11 @@
-from accounts.models import Cart
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect,HttpResponse
 from django.contrib.auth import authenticate , login , logout
-from .models import Profile
-
-# Create your views here.
+from django.contrib.auth.decorators import login_required
+from .models import Profile, Cart, CartItem
+from products.models import Product, SizeVariant
 
 
 def login_page(request):
@@ -69,7 +68,22 @@ def activate_email(request , email_token):
     except Exception as e:
         return HttpResponse('Invalid Email token')
 
+@login_required
+def add_to_cart(request, uid):
+    variant= request.GET.get("variant")
+    product = Product.objects.get(uid= uid)
+    user = request.user
+    cart, _ = Cart.objects.get_or_create(user = user, is_paid=False)
+
+    if variant:
+        size_variant = SizeVariant.objects.get(size_name=variant)
+        cart_item, _ = CartItem.objects.get_or_create(cart=cart, product=product, size_variant=size_variant)
+    else:
+        cart_item, _ = CartItem.objects.get_or_create(cart=cart, product=product, size_variant=None)
+        
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 def cart(request):
-    cart = Cart.objects.filter(user=request.user, is_paid=False).first()
-    return render(request, 'accounts/cart.html', {'cart': cart})
+    cart_obj = Cart.objects.filter(user=request.user, is_paid=False).first()
+    return render(request, 'accounts/cart.html', {'cart': cart_obj})
