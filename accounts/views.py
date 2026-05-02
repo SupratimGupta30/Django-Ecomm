@@ -83,6 +83,15 @@ def add_to_cart(request, uid):
         
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
+@login_required
+def remove_from_cart(request, cart_item_uid):
+    try:
+        cart_item = CartItem.objects.get(uid= cart_item_uid)
+        cart_item.delete()
+    except Exception as e:
+        return HttpResponse('Invalid Cart Item')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 def cart(request):
     cart_obj = Cart.objects.filter(user=request.user, is_paid=False).first()
