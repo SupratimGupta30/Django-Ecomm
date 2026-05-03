@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import authenticate , login , logout
 from django.contrib.auth.decorators import login_required
 from .models import Profile, Cart, CartItem
@@ -70,24 +70,39 @@ def activate_email(request , email_token):
 
 @login_required
 def add_to_cart(request, uid):
-    variant= request.GET.get("variant")
-    product = Product.objects.get(uid= uid)
+    variant = request.GET.get("variant")
+    quantity = int(request.GET.get("quantity", 1))
+    product = Product.objects.get(uid=uid)
     user = request.user
-    cart, _ = Cart.objects.get_or_create(user = user, is_paid=False)
+    cart, _ = Cart.objects.get_or_create(user=user, is_paid=False)
 
     if variant:
         size_variant = SizeVariant.objects.get(size_name=variant)
-        cart_item, _ = CartItem.objects.get_or_create(cart=cart, product=product, size_variant=size_variant)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, size_variant=size_variant)
     else:
-        cart_item, _ = CartItem.objects.get_or_create(cart=cart, product=product, size_variant=None)
-        
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, size_variant=None)
+
+    if not created:
+        cart_item.quantity += quantity
+    else:
+        cart_item.quantity = quantity
+    cart_item.save()
+
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @login_required
 def remove_from_cart(request, cart_item_uid):
+    action = request.GET.get('action')  # 'decrease' decrements by 1; default removes entirely
     try:
-        cart_item = CartItem.objects.get(uid= cart_item_uid)
-        cart_item.delete()
+        cart_item = CartItem.objects.get(uid=cart_item_uid)
+        if action == 'decrease':
+            if cart_item.quantity > 1:
+                cart_item.quantity -= 1
+                cart_item.save()
+            else:
+                cart_item.delete()
+        else:
+            cart_item.delete()
     except Exception as e:
         return HttpResponse('Invalid Cart Item')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

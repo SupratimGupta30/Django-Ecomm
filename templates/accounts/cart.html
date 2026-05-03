@@ -45,14 +45,14 @@
 							</td>
 							<td>
 								<div class="input-group mb-3 input-spinner">
-									<div class="input-group-prepend">
-										<button class="btn btn-light" type="button" id="button-plus"> + </button>
-									</div>
-									<input type="text" class="form-control" value="1">
-									<div class="input-group-append">
-										<button class="btn btn-light" type="button" id="button-minus"> − </button>
-                                    </div>
-                                </div>
+						<div class="input-group-prepend">
+							<a href="{% url 'add_to_cart' item.product.uid %}?quantity=1{% if item.size_variant %}&variant={{ item.size_variant.size_name }}{% endif %}" class="btn btn-light" id="button-plus-{{ item.uid }}"> + </a>
+						</div>
+						<input type="text" class="form-control text-center" value="{{ item.quantity }}" readonly>
+						<div class="input-group-append">
+							<a href="{% url 'remove_from_cart' item.uid %}?action=decrease" class="btn btn-light" id="button-minus-{{ item.uid }}"> − </a>
+                        </div>
+                    </div>
 							</td>
 							<td>
 								<div class="price-wrap">

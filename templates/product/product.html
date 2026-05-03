@@ -75,11 +75,11 @@
                 <label>Quantity</label>
                 <div class="input-group mb-3 input-spinner">
                   <div class="input-group-prepend">
-                    <button class="btn btn-light" type="button" id="button-plus"> + </button>
+                    <button class="btn btn-light" type="button" id="button-plus" onclick="changeQty(1)"> + </button>
                   </div>
-                  <input type="text" class="form-control" value="1">
+                  <input type="text" class="form-control text-center" id="qty-input" value="1" readonly>
                   <div class="input-group-append">
-                    <button class="btn btn-light" type="button" id="button-minus"> − </button>
+                    <button class="btn btn-light" type="button" id="button-minus" onclick="changeQty(-1)"> − </button>
                   </div>
                 </div>
             </div> <!-- col.// -->
@@ -103,7 +103,7 @@
         </div> <!-- row.// -->
     
         <a href="#" class="btn  btn-primary"> Buy now </a>
-        <a href="{% url "add_to_cart" product.uid %}?variant={{selected_size}}" class="btn  btn-outline-primary"> <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </a>
+        <a href="{% url "add_to_cart" product.uid %}?variant={{selected_size}}&quantity=1" id="add-to-cart-btn" class="btn  btn-outline-primary"> <span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </a>
     </article> <!-- product-info-aside .// -->
             </main> <!-- col.// -->
         </div> <!-- row.// -->
@@ -120,6 +120,24 @@
           window.location.href = window.location.pathname + `?size=${size}`;
         }
 
+        function changeQty(delta) {
+          const input = document.getElementById('qty-input');
+          let val = parseInt(input.value) + delta;
+          if (val < 1) val = 1;
+          input.value = val;
+          updateAddToCartUrl();
+        }
+
+        function updateAddToCartUrl() {
+          const qty = document.getElementById('qty-input').value;
+          const btn = document.getElementById('add-to-cart-btn');
+          const url = new URL(btn.href, window.location.origin);
+          url.searchParams.set('quantity', qty);
+          btn.href = url.pathname + url.search;
+        }
+
+        // Initialise on page load
+        document.addEventListener('DOMContentLoaded', updateAddToCartUrl);
     </script>
 
 {% endblock start %}
